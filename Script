@@ -1,0 +1,274 @@
+```html
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Scriptorium Imperiale v7.0 - Versione Regia</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Medievali, Accademici e Orientali -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=MedievalSharp&family=Noto+Serif+JP:wght@400;700&family=Spectral:ital,wght@0,300;0,400;0,600;0,800;1,400&display=swap" rel="stylesheet">
+    <!-- Font Awesome per Icone di Pregio -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Spectral', serif;
+            background-color: #070503;
+            color: #f7efe2;
+            overflow-x: hidden;
+        }
+        .medieval-font { font-family: 'MedievalSharp', cursive; }
+        .title-font { font-family: 'Cinzel', serif; }
+        .japanese-font { font-family: 'Noto Serif JP', serif; }
+        
+        /* Effetto Carta Pergamena Imperiale di Pregio */
+        .parchment {
+            background-color: #f5ead0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.45) 0%, rgba(245,223,184,0.35) 100%);
+            color: #261607;
+            border: 3px solid #bf9443;
+            box-shadow: inset 0 0 50px rgba(135,80,20,0.25), 0 15px 35px rgba(0,0,0,0.8);
+        }
+        .parchment-dark {
+            background: #15100a;
+            border: 1px solid #3d2713;
+            color: #ebdcd0;
+        }
+        .colorable {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .colorable:hover {
+            filter: brightness(0.85);
+            stroke: #d4af37 !important;
+            stroke-width: 3px !important;
+        }
+        .tab-active {
+            border-bottom: 4px solid #d4af37;
+            color: #d4af37 !important;
+            background-color: rgba(212, 175, 55, 0.12);
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+        }
+        /* Quadretti millimetrati ispirati al foglio dell'utente */
+        .grid-paper {
+            background-image: linear-gradient(rgba(185, 125, 60, 0.15) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(185, 125, 60, 0.15) 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+        /* Scrollbar medievale */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #060403; }
+        ::-webkit-scrollbar-thumb {
+            background: #40230b;
+            border-radius: 4px;
+            border: 1px solid #bf9443;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
+        
+        @keyframes srotola {
+            from { transform: scaleY(0); opacity: 0; transform-origin: top; }
+            to { transform: scaleY(1); opacity: 1; transform-origin: top; }
+        }
+        .srotola-anim { animation: srotola 0.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden japanese-font" onkeydown="handleGlobalKeys(event)">
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-notification" class="fixed top-6 right-6 z-50 max-w-sm bg-stone-950/95 border-2 border-amber-500 text-amber-100 px-5 py-3 rounded shadow-2xl transform translate-x-full transition-transform duration-300 pointer-events-none flex items-center gap-3 text-xs md:text-sm">
+        <i class="fa-solid fa-feather-pointed text-amber-400 text-lg animate-pulse"></i>
+        <span id="toast-text" class="font-medium">Notifica</span>
+    </div>
+
+    <!-- ================= SCHERMATA LOGIN, SELEZIONE LINGUA E ACCOUNT SECURE ================= -->
+    <div id="auth-screen" class="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
+        <div class="parchment p-8 rounded-xl max-w-lg w-full space-y-5 text-center border-4 border-amber-600 relative overflow-hidden">
+            <div class="absolute -right-16 -top-16 text-amber-900/10 text-[10rem] pointer-events-none transform rotate-12">
+                <i class="fa-solid fa-earth-europe"></i>
+            </div>
+            
+            <div>
+                <span class="text-amber-800 text-5xl"><i class="fa-solid fa-feather-pointed"></i></span>
+                <h2 class="medieval-font text-3xl md:text-4xl text-amber-950 mt-1">Scriptorium Imperiale</h2>
+                <p class="text-[10px] text-stone-700 uppercase tracking-widest font-bold">La Grande Gilda dell'Inchiostro v7.0</p>
+            </div>
+
+            <!-- SELEZIONE LINGUA ALL'AVVIO -->
+            <div class="bg-amber-900/10 p-3 rounded border border-amber-950/20 space-y-1.5">
+                <label class="block text-xs font-bold uppercase text-amber-950/80"><i class="fa-solid fa-language mr-1"></i> Scegli la tua Lingua / Choose Language</label>
+                <div class="grid grid-cols-4 gap-1">
+                    <button onclick="setGlobalLanguage('it')" id="lang-it" class="py-1 text-[11px] font-bold border rounded bg-amber-800 text-white border-amber-500">🇮🇹 ITA</button>
+                    <button onclick="setGlobalLanguage('en')" id="lang-en" class="py-1 text-[11px] font-bold border rounded bg-white text-stone-900 border-transparent">🇬🇧 ENG</button>
+                    <button onclick="setGlobalLanguage('ja')" id="lang-ja" class="py-1 text-[11px] font-bold border rounded bg-white text-stone-900 border-transparent">🇯🇵 日本語</button>
+                    <button onclick="setGlobalLanguage('es')" id="lang-es" class="py-1 text-[11px] font-bold border rounded bg-white text-stone-900 border-transparent">🇪🇸 ESP</button>
+                    <button onclick="setGlobalLanguage('fr')" id="lang-fr" class="py-1 text-[11px] font-bold border rounded bg-white text-stone-900 border-transparent">🇫🇷 FRA</button>
+                    <button onclick="setGlobalLanguage('de')" id="lang-de" class="py-1 text-[11px] font-bold border rounded bg-white text-stone-900 border-transparent">🇩🇪 DEU</button>
+                    <button onclick="setGlobalLanguage('la')" id="lang-la" class="py-1 text-[11px] font-bold border rounded bg-white text-stone-900 border-transparent">🏛️ LAT</button>
+                </div>
+            </div>
+
+            <form onsubmit="handleAuthSubmit(event)" class="space-y-3 text-left">
+                <div>
+                    <label id="lbl-novice-name" class="block text-xs font-bold uppercase text-amber-950/80 mb-1">Nome dello Scriba</label>
+                    <input type="text" id="auth-user" required placeholder="Es. Frate Alcuino" class="w-full p-2.5 bg-stone-100 border border-amber-900/40 rounded text-stone-900 text-sm font-bold focus:ring-2 focus:ring-amber-700 outline-none">
+                </div>
+                <div>
+                    <label id="lbl-password" class="block text-xs font-bold uppercase text-amber-950/80 mb-1">Chiave d'Accesso (Password)</label>
+                    <input type="password" id="auth-pass" required placeholder="••••••••" class="w-full p-2.5 bg-stone-100 border border-amber-900/40 rounded text-stone-900 text-sm focus:ring-2 focus:ring-amber-700 outline-none">
+                </div>
+                
+                <div class="flex items-center gap-2 p-2 bg-amber-900/10 rounded border border-amber-950/20">
+                    <input type="checkbox" id="auth-oath" required class="accent-amber-900">
+                    <label id="lbl-oath" for="auth-oath" class="text-[10px] text-stone-700 leading-tight">Giuro solennemente di rispettare i segreti della gilda ed esercitare la mano.</label>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="submit" id="btn-submit" class="flex-1 py-3 bg-amber-800 hover:bg-amber-900 text-stone-100 font-bold uppercase rounded text-xs transition shadow-md">
+                        Entra <i class="fa-solid fa-key ml-1"></i>
+                    </button>
+                    <!-- CARICAMENTO BACKUP SALVATAGGIO -->
+                    <label class="py-3 px-4 bg-stone-800 hover:bg-stone-900 text-amber-100 font-bold uppercase rounded text-xs transition cursor-pointer flex items-center justify-center" title="Importa il tuo Sigillo salvato">
+                        <i class="fa-solid fa-upload"></i>
+                        <input type="file" id="import-backup-file" class="hidden" onchange="importBackupSigil(event)">
+                    </label>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- AREA APPLICAZIONE -->
+    <div id="app-workspace" class="hidden min-h-screen flex flex-col justify-between">
+        
+        <!-- HEADER -->
+        <header class="border-b border-amber-950 bg-stone-950/95 sticky top-0 z-40 px-4 py-3 shadow-2xl">
+            <div class="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-synagogue text-amber-500 text-3xl"></i>
+                    <div>
+                        <h1 class="title-font text-lg md:text-xl font-bold tracking-widest text-amber-500">Il Scriptorium Imperiale</h1>
+                        <div class="flex flex-wrap items-center gap-3 text-[10px] text-amber-200/50 uppercase font-bold tracking-widest mt-0.5">
+                            <span>Scriba: <span id="tag-user" class="text-amber-400">Alcuino</span></span>
+                            <span>•</span>
+                            <span>Grado: <span id="tag-rank" class="text-amber-500">Novizio</span></span>
+                            <span>•</span>
+                            <span>Soldi: <span id="tag-coins" class="text-green-400">0</span></span>
+                            <span>•</span>
+                            <span>Studio: <span id="tag-progress" class="text-blue-400">0%</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CORO GREGORIANO SINTETIZZATORE -->
+                <div class="flex items-center gap-2 bg-stone-900 px-3 py-1.5 rounded border border-stone-800 text-xs">
+                    <span class="text-stone-300 font-serif"><i class="fa-solid fa-music text-amber-500 mr-1 animate-pulse"></i> Choral Gregorian Chant</span>
+                    <button onclick="toggleChantSynth()" id="btn-choir" class="px-2.5 py-1 bg-amber-800 hover:bg-amber-700 text-white font-bold rounded text-[10px]">OFF</button>
+                </div>
+                
+                <!-- NAVIGAZIONE PRINCIPALE -->
+                <nav class="flex flex-wrap justify-center gap-1">
+                    <button onclick="switchTab('libri')" id="nav-libri" class="tab-btn px-2.5 py-1.5 rounded text-xs font-bold text-stone-400"><i class="fa-solid fa-book-open mr-1"></i> Biblioteca</button>
+                    <button onclick="switchTab('calligrafia')" id="nav-calligrafia" class="tab-btn px-2.5 py-1.5 rounded text-xs font-bold text-stone-400"><i class="fa-solid fa-pen-fancy mr-1"></i> Tavola Lettere</button>
+                    <button onclick="switchTab('miniature')" id="nav-miniature" class="tab-btn px-2.5 py-1.5 rounded text-xs font-bold text-stone-400"><i class="fa-solid fa-palette mr-1"></i> Capilettera</button>
+                    <button onclick="switchTab('pagine')" id="nav-pagine" class="tab-btn px-2.5 py-1.5 rounded text-xs font-bold text-stone-400"><i class="fa-solid fa-scroll mr-1"></i> Manoscritti</button>
+                    <button onclick="switchTab('alchimia')" id="nav-alchimia" class="tab-btn px-2.5 py-1.5 rounded text-xs font-bold text-stone-400"><i class="fa-solid fa-mortar-pestle mr-1"></i> Alchimia</button>
+                    <button onclick="switchTab('mappa')" id="nav-mappa" class="tab-btn px-2.5 py-1.5 rounded text-xs font-bold text-stone-400"><i class="fa-solid fa-map-marked-alt mr-1"></i> Cartina</button>
+                    <button onclick="switchTab('registro')" id="nav-registro" class="tab-btn px-2.5 py-1.5 rounded text-xs font-bold text-stone-400"><i class="fa-solid fa-address-book mr-1"></i> Registro</button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- CONTENUTO PRINCIPALE -->
+        <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:py-6">
+
+            <!-- ================= TAB: LIBRERIA COMPLETA MATERIE ================= -->
+            <section id="view-libri" class="tab-view hidden space-y-6 srotola-anim">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Sezione Scelta del Tomo -->
+                    <div class="lg:col-span-4 space-y-4">
+                        <div class="bg-stone-900/95 border border-amber-900/30 p-5 rounded-lg space-y-3 shadow-xl">
+                            <h3 class="medieval-font text-amber-400 text-lg border-b border-stone-800 pb-2"><i class="fa-solid fa-book mr-2"></i>Tomi di Studio</h3>
+                            
+                            <!-- SELETTORE DEL LIBRO ATTIVO -->
+                            <select id="book-selector" onchange="renderChaptersList()" class="w-full p-2 bg-stone-850 border border-amber-900/30 rounded text-stone-900 text-xs font-bold focus:ring-2 focus:ring-amber-700 outline-none">
+                                <option value="storia_amanuense">Storia dell'Amanuense (10 Capitoli)</option>
+                                <option value="storia_colori">Storia dei Colori Medievali (10 Capitoli)</option>
+                                <option value="storia_alchimia">Storia dell'Alchimia (10 Capitoli)</option>
+                                <option value="geometria_miniature">Geometria delle Miniature (10 Capitoli)</option>
+                                <option value="cartapecora">La Cartapecora e Rilegatura (10 Capitoli)</option>
+                                <option value="calami">I Calami e le Penne (10 Capitoli)</option>
+                                <option value="latino">Il Tomo della Lingua Latina (100 Capitoli)</option>
+                            </select>
+
+                            <div class="space-y-1.5 max-h-[220px] overflow-y-auto pr-1" id="chapters-list"></div>
+                        </div>
+
+                        <!-- Stato Blocco ed Esami -->
+                        <div class="bg-stone-900/95 border border-amber-900/30 p-5 rounded-lg space-y-3 shadow-xl">
+                            <h4 class="medieval-font text-sm text-amber-500"><i class="fa-solid fa-graduation-cap mr-2"></i>Status Avanzamento</h4>
+                            <div class="p-3 bg-stone-950/60 rounded border border-amber-900/20 text-xs space-y-2 text-stone-300">
+                                <p>Per superare l'esame finale di questa materia e passare al capitolo successivo, hai bisogno di almeno <strong class="text-amber-400">10 valutazioni</strong> registrate in questa disciplina.</p>
+                                <div class="flex justify-between items-center border-t border-stone-800 pt-2">
+                                    <span>Valutazioni correnti in materia:</span>
+                                    <span class="text-sm font-bold text-green-400 font-mono" id="grades-count">0 / 10</span>
+                                </div>
+                            </div>
+                            <button id="btn-exam" onclick="startFinalSubjectExam()" disabled class="w-full py-2.5 bg-amber-800 hover:bg-amber-900 disabled:bg-stone-800 disabled:text-stone-500 text-white font-bold uppercase rounded text-xs transition shadow-md">
+                                Sostieni Esame Finale di Scrittura (10 Pagine) <i class="fa-solid fa-crown ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lettore di Pagine con Struttura a 5 Pagine e Quiz di Sblocco -->
+                    <div class="lg:col-span-8 space-y-4">
+                        <div class="parchment p-6 rounded-lg flex flex-col justify-between min-h-[460px] relative shadow-2xl">
+                            <div class="flex justify-between items-center border-b border-amber-950/20 pb-3 mb-4">
+                                <div>
+                                    <span class="text-xs uppercase tracking-widest font-bold text-amber-900" id="display-chap-idx">Capitolo I</span>
+                                    <h3 class="medieval-font text-2xl text-amber-950" id="display-chap-title">Titolo del Capitolo</h3>
+                                </div>
+                                <div class="text-xs font-mono font-bold text-amber-900 bg-amber-950/10 px-2.5 py-1 rounded">
+                                    Pagina <span id="display-page-num">1</span> di 5
+                                </div>
+                            </div>
+
+                            <div class="text-sm text-stone-900 leading-relaxed font-serif space-y-4 flex-grow" id="display-page-content"></div>
+
+                            <div class="flex justify-between items-center pt-4 border-t border-amber-950/20 mt-6">
+                                <button onclick="prevBookPage()" id="btn-prev-page" class="px-4 py-2 bg-stone-800 text-amber-100 hover:bg-stone-900 text-xs font-bold rounded flex items-center gap-1">
+                                    <i class="fa-solid fa-arrow-left"></i> <span class="lbl-prev">Precedente</span>
+                                </button>
+                                
+                                <button onclick="openChapterQuiz()" id="btn-unlock-quiz" disabled class="px-5 py-2.5 bg-yellow-600 disabled:bg-stone-400 disabled:text-stone-700 hover:bg-yellow-700 text-stone-950 font-bold uppercase text-xs rounded shadow-lg transition flex items-center gap-2">
+                                    <i class="fa-solid fa-scroll"></i> <span class="lbl-unlock-quiz">Sblocca Quiz Capitolo</span>
+                                </button>
+
+                                <button onclick="nextBookPage()" id="btn-next-page" class="px-4 py-2 bg-stone-800 text-amber-100 hover:bg-stone-900 text-xs font-bold rounded flex items-center gap-1">
+                                    <span class="lbl-next">Successivo</span> <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OVERLAY PER QUIZ E VERIFICHE -->
+                <div id="quiz-overlay" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4">
+                    <div class="parchment p-6 rounded-lg max-w-lg w-full space-y-6 border-4 border-amber-500 shadow-2xl">
+                        <div class="flex justify-between items-center border-b border-amber-950/20 pb-2">
+                            <h3 class="medieval-font text-xl text-amber-950" id="quiz-modal-title">Verifica di Fine Capitolo</h3>
+                            <button onclick="closeQuizOverlay()" class="text-stone-600 hover:text-stone-900 text-lg"><i class="fa-solid fa-circle-xmark"></i></button>
+                        </div>
+                        <div id="quiz-modal-body" class="space-y-4"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= TAB: CALLIGRAFIA (A-Z COMPLETO) ================= -->
+            <section id="view-calligrafia" class="tab-view hidden space-y-4 srotola-anim">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-4 space-y-4">
+                        <div class="parchment p-4 rounded-lg space-y-4">
+                            <h3 class="medieval-font text-base font-bold text-amber-900 border-b borde
